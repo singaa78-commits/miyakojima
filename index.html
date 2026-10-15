@@ -3,257 +3,438 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>미야코지마 힐튼 & 시내 맛집·명소 가이드</title>
+  <title>미야코지마 슬로우 아일랜드 가이드</title>
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", sans-serif; }
-    body { display: flex; flex-direction: column; height: 100vh; overflow: hidden; background: #f8fafc; color: #1e293b; }
-    header { background: #0f172a; color: #fff; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.15); z-index: 1000; }
-    header h1 { font-size: 1.1rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
-    .badge { font-size: 0.75rem; background: #2563eb; padding: 3px 8px; border-radius: 12px; font-weight: 500; }
+    body { display: flex; flex-direction: column; height: 100vh; height: 100dvh; overflow: hidden; background: #f8fafc; color: #1e293b; }
+    header { background: #0f172a; color: #fff; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; gap: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); z-index: 1000; }
+    header h1 { font-size: 1.05rem; font-weight: 700; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    header .sub { font-size: 0.72rem; color: #94a3b8; font-weight: 500; letter-spacing: 0.04em; }
+    .badge { font-size: 0.72rem; background: #2563eb; padding: 3px 8px; border-radius: 12px; font-weight: 500; }
+    .tabs { display: flex; gap: 4px; }
+    .tab-btn { border: none; background: transparent; color: #cbd5e1; padding: 7px 12px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; white-space: nowrap; }
+    .tab-btn.active { background: #fff; color: #0f172a; }
+    .view { display: none; flex: 1; min-height: 0; flex-direction: column; }
+    .view.active { display: flex; }
+
+    /* 지도 탭 */
     .filter-bar { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 10px 16px; display: flex; gap: 8px; overflow-x: auto; z-index: 1000; }
     .filter-btn { border: 1px solid #cbd5e1; background: #fff; padding: 6px 14px; border-radius: 20px; font-size: 0.82rem; font-weight: 600; cursor: pointer; white-space: nowrap; transition: 0.2s; color: #475569; }
     .filter-btn.active { background: #0f172a; color: #fff; border-color: #0f172a; }
-    .content-area { display: flex; flex: 1; height: calc(100vh - 110px); position: relative; }
+    .filter-btn.day2 { border-color: #f97316; color: #c2410c; }
+    .filter-btn.day2.active { background: #f97316; color: #fff; }
+    .content-area { display: flex; flex: 1; min-height: 0; position: relative; }
     #map { flex: 1.2; height: 100%; z-index: 1; }
     .sidebar { flex: 0.9; max-width: 420px; height: 100%; overflow-y: auto; background: #f8fafc; border-left: 1px solid #e2e8f0; padding: 14px; }
+    .list-note { font-size: 0.78rem; color: #64748b; margin-bottom: 10px; line-height: 1.45; }
     .card { background: #fff; border-radius: 12px; padding: 14px; margin-bottom: 12px; border: 1px solid #e2e8f0; cursor: pointer; transition: all 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
     .card:hover, .card.selected { border-color: #3b82f6; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(59,130,246,0.12); }
-    .card-zone { display: inline-block; font-size: 0.72rem; font-weight: 700; padding: 2px 7px; border-radius: 6px; margin-bottom: 6px; }
+    .card-top { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; }
+    .chip { display: inline-block; font-size: 0.7rem; font-weight: 700; padding: 2px 7px; border-radius: 6px; }
     .zone-walk { background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; }
     .zone-city { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
-    .card-title { font-size: 0.98rem; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
+    .zone-stay { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+    .chip-pick { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+    .chip-day2 { background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; }
+    .card-title { font-size: 0.98rem; font-weight: 700; color: #0f172a; margin-bottom: 2px; }
+    .card-jp { font-size: 0.74rem; color: #94a3b8; margin-bottom: 4px; }
     .card-cat { font-size: 0.76rem; color: #64748b; font-weight: 500; }
-    .card-desc { font-size: 0.82rem; color: #475569; line-height: 1.45; margin-top: 6px; }
+    .card-desc { font-size: 0.82rem; color: #475569; line-height: 1.5; margin-top: 6px; }
+    .card-hours { font-size: 0.76rem; color: #0f172a; background: #f1f5f9; border-radius: 6px; padding: 4px 8px; margin-top: 8px; display: inline-block; }
+    .card-approx { font-size: 0.7rem; color: #94a3b8; margin-top: 6px; }
     .card-btn { display: inline-block; margin-top: 10px; font-size: 0.78rem; color: #2563eb; text-decoration: none; font-weight: 600; background: #f1f5f9; padding: 5px 10px; border-radius: 6px; }
     .card-btn:hover { background: #e2e8f0; }
+    .pin { display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 50%; background: #fff; border: 3px solid; font-size: 15px; box-shadow: 0 2px 6px rgba(0,0,0,0.35); }
+
+    /* 일정·정보 탭 */
+    .page { flex: 1; overflow-y: auto; }
+    .page-inner { max-width: 820px; margin: 0 auto; padding: 20px 16px 48px; }
+    .section { margin-bottom: 28px; }
+    .eyebrow { font-size: 0.7rem; font-weight: 700; color: #f97316; letter-spacing: 0.08em; margin-bottom: 4px; }
+    .section h2 { font-size: 1.15rem; color: #0f172a; margin-bottom: 10px; }
+    .section h3 { font-size: 0.95rem; color: #0f172a; margin: 16px 0 8px; }
+    .section p { font-size: 0.88rem; line-height: 1.6; color: #334155; margin-bottom: 8px; }
+    .box { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; }
+    .note { font-size: 0.78rem; color: #64748b; margin-top: 8px; line-height: 1.5; }
+    .warn { background: #fff7ed; border: 1px solid #fed7aa; color: #9a3412; border-radius: 10px; padding: 12px 14px; font-size: 0.84rem; line-height: 1.55; margin-top: 12px; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
+    th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid #e2e8f0; vertical-align: top; line-height: 1.45; }
+    th { background: #f1f5f9; color: #475569; font-size: 0.76rem; font-weight: 700; }
+    td.day { font-weight: 700; white-space: nowrap; }
+    tr.hl td { background: #fff7ed; }
+    .tbd { color: #94a3b8; }
+    .timeline { list-style: none; position: relative; }
+    .timeline li { position: relative; padding: 0 0 16px 22px; border-left: 2px solid #e2e8f0; margin-left: 6px; }
+    .timeline li:last-child { border-left-color: transparent; padding-bottom: 0; }
+    .timeline li::before { content: ""; position: absolute; left: -7px; top: 3px; width: 12px; height: 12px; border-radius: 50%; background: #fff; border: 2px solid #94a3b8; }
+    .timeline li.key::before { background: #f97316; border-color: #f97316; }
+    .t-time { font-size: 0.76rem; font-weight: 700; color: #64748b; }
+    .timeline li.key .t-time { color: #c2410c; }
+    .t-title { font-size: 0.92rem; font-weight: 700; color: #0f172a; margin: 2px 0; }
+    .t-desc { font-size: 0.82rem; color: #475569; line-height: 1.5; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .btn { display: inline-block; border: 1px solid #cbd5e1; background: #fff; color: #0f172a; padding: 7px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; text-decoration: none; cursor: pointer; }
+    .btn.primary { background: #0f172a; color: #fff; border-color: #0f172a; }
+    .btn:hover { opacity: 0.85; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+    .mini { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; }
+    .mini h4 { font-size: 0.92rem; color: #0f172a; margin-bottom: 4px; }
+    .mini .meta { font-size: 0.74rem; color: #64748b; margin-bottom: 6px; }
+    .mini p { font-size: 0.8rem; color: #475569; line-height: 1.5; margin: 0; }
+    .check { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; border-bottom: 1px dashed #e2e8f0; font-size: 0.86rem; cursor: pointer; }
+    .check:last-of-type { border-bottom: none; }
+    .check input { margin-top: 3px; width: 16px; height: 16px; accent-color: #f97316; }
+    .check-count { font-size: 0.78rem; font-weight: 700; color: #c2410c; }
+    .course { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; }
+    .course .tag { font-size: 0.7rem; font-weight: 700; color: #2563eb; letter-spacing: 0.06em; }
+    .course h4 { font-size: 0.95rem; margin: 2px 0 8px; color: #0f172a; }
+    .course ol { padding-left: 18px; font-size: 0.82rem; color: #334155; line-height: 1.7; }
+    .phrase { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 10px; }
+    .phrase .jp { font-size: 1.05rem; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
+    .phrase .ko { font-size: 0.8rem; color: #64748b; }
+
     @media (max-width: 768px) {
+      header { padding: 10px 16px; flex-direction: column; align-items: stretch; }
+      .tabs { justify-content: space-between; }
+      .tab-btn { flex: 1; }
       .content-area { flex-direction: column; }
-      #map { flex: none; height: 45vh; }
+      #map { flex: none; height: 42vh; }
       .sidebar { flex: 1; max-width: 100%; border-left: none; border-top: 1px solid #e2e8f0; }
+      th, td { padding: 8px 6px; }
     }
   </style>
 </head>
 <body>
 
   <header>
-    <h1>🌺 미야코지마 가이드북 <span class="badge">힐튼 & 시내</span></h1>
+    <h1>🌺 미야코지마 가이드북 <span class="badge">힐튼 베이스 · 렌터카 없이</span> <span class="sub">THE SLOW ISLAND GUIDE · 2026</span></h1>
+    <nav class="tabs">
+      <button class="tab-btn active" data-view="mapView">🗺️ 지도</button>
+      <button class="tab-btn" data-view="planView">📅 일정</button>
+      <button class="tab-btn" data-view="infoView">💡 여행 정보</button>
+    </nav>
   </header>
 
-  <div class="filter-bar">
-    <button class="filter-btn active" onclick="filterPlaces('all', this)">전체 보기</button>
-    <button class="filter-btn" onclick="filterPlaces('walk', this)">🚶‍♂️ 힐튼 도보권</button>
-    <button class="filter-btn" onclick="filterPlaces('city', this)">🚗 시내 (차량 5분)</button>
-    <button class="filter-btn" onclick="filterPlaces('food', this)">🍜 맛집/카페</button>
-    <button class="filter-btn" onclick="filterPlaces('spot', this)">🏖️ 명소/편의</button>
-  </div>
+  <!-- ========== 지도 탭 ========== -->
+  <section class="view active" id="mapView">
+    <div class="filter-bar">
+      <button class="filter-btn active" data-filter="all">전체 보기</button>
+      <button class="filter-btn day2" data-filter="day2">🤿 DAY 2 야비지</button>
+      <button class="filter-btn" data-filter="walk">🚶 힐튼 도보권</button>
+      <button class="filter-btn" data-filter="city">🚕 시내 (택시)</button>
+      <button class="filter-btn" data-filter="food">🍜 맛집</button>
+      <button class="filter-btn" data-filter="cafe">☕ 카페</button>
+      <button class="filter-btn" data-filter="shop">🛍️ 소품샵·마켓</button>
+      <button class="filter-btn" data-filter="spot">🏖️ 명소·편의</button>
+    </div>
+    <div class="content-area">
+      <div id="map"></div>
+      <div class="sidebar" id="placesList"></div>
+    </div>
+  </section>
 
-  <div class="content-area">
-    <div id="map"></div>
-    <div class="sidebar" id="placesList"></div>
-  </div>
+  <!-- ========== 일정 탭 ========== -->
+  <section class="view" id="planView">
+    <div class="page"><div class="page-inner">
 
-  <!-- Leaflet 지도 라이브러리 (API 키 불필요, 100% 무료) -->
+      <div class="section">
+        <div class="eyebrow">3박 4일 전체 일정</div>
+        <h2>여행 일정 한눈에 보기</h2>
+        <div class="box" style="padding:0; overflow:hidden;">
+          <table>
+            <thead><tr><th>날짜</th><th>주요 일정</th><th>이동</th></tr></thead>
+            <tbody>
+              <tr><td class="day">DAY 1</td><td class="tbd">미정 · 항공편 확정 후 작성 (도착 → 힐튼 체크인 → 리조트 선셋 등)</td><td class="tbd">-</td></tr>
+              <tr class="hl"><td class="day">DAY 2</td><td><b>확정</b> · 호텔 조식·휴식 → 12:45~17:10 야비지 투어 → 파이나가마 근처 저녁·산책</td><td>도보 중심</td></tr>
+              <tr><td class="day">DAY 3</td><td class="tbd">미정 · 후보: 시내 맛집 + 니시자토 소품샵 (아래 추천 코스 참고)</td><td class="tbd">-</td></tr>
+              <tr><td class="day">DAY 4</td><td class="tbd">미정 · 항공편 확정 후 작성</td><td class="tbd">-</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="note">1·3·4일 차는 비워두고, 추가하고 싶은 장소나 일정이 생길 때 하나씩 채워갈 예정이에요.</p>
+      </div>
+
+      <div class="section">
+        <div class="eyebrow">DAY 2 · YABIJI DAY · 확정</div>
+        <h2>야비지 투어와 미야코지마의 저녁</h2>
+        <p>오전은 느긋하게, 오후는 바다에서, 저녁은 파이나가마 동네에서 보내는 하루예요.</p>
+        <div class="box">
+          <ul class="timeline">
+            <li><div class="t-time">08:00~09:00</div><div class="t-title">힐튼 리조트 조식</div><div class="t-desc">호텔 레스토랑에서 여유롭게 조식. 이후 수영이나 객실 휴식.</div></li>
+            <li><div class="t-time">09:00~11:30</div><div class="t-title">리조트에서 휴식</div><div class="t-desc">오후 스노클링을 고려해 무리한 활동은 하지 않기.</div></li>
+            <li><div class="t-time">11:45 전후</div><div class="t-title">도보로 투어 집결지 이동 (약 36분)</div><div class="t-desc">힐튼 → Cafe&amp;Bar FLOV. 더운 날에는 30분 이상 여유 있게 출발.</div></li>
+            <li class="key"><div class="t-time">12:45~17:10</div><div class="t-title">🤿 야비지 스노클링 투어</div><div class="t-desc">집결지: Cafe&amp;Bar FLOV (沖縄県宮古島市平良下里108-17). 체크인 마감 시간은 예약 안내문 확인.</div></li>
+            <li><div class="t-time">17:10~18:00</div><div class="t-title">정리 후 파이나가마 해변 산책</div><div class="t-desc">물기와 소지품 정리 → FLOV에서 도보 약 7분.</div></li>
+            <li><div class="t-time">18:00~19:30</div><div class="t-title">근처 맛집에서 저녁</div><div class="t-desc">파이나 테라스 · FLOV · 보카 버거 중 선택 (아래 후보 참고).</div></li>
+            <li><div class="t-time">19:30~20:30</div><div class="t-title">카페·바 또는 가벼운 산책</div><div class="t-desc">체력이 남으면 FLOV에서 음료 한 잔.</div></li>
+            <li><div class="t-time">20:30 이후</div><div class="t-title">택시로 힐튼 복귀</div><div class="t-desc">밤에는 피로도와 보행 환경을 고려해 택시 추천.</div></li>
+          </ul>
+          <div class="btn-row">
+            <a class="btn primary" target="_blank" href="https://www.google.com/maps/dir/?api=1&origin=Hilton+Okinawa+Miyako+Island+Resort&destination=Cafe%26Bar+FLOV+%E5%AE%AE%E5%8F%A4%E5%B3%B6%E5%B8%82%E5%B9%B3%E8%89%AF%E4%B8%8B%E9%87%8C108-17&travelmode=walking">🚶 힐튼 → FLOV 도보 길찾기 ↗</a>
+            <button class="btn" data-goto-filter="day2">🗺️ DAY 2 장소 지도에서 보기</button>
+          </div>
+          <div class="warn"><b>중요:</b> 힐튼은 해안가에 있지만 FLOV로 가는 길이 전부 해변 산책로로 연결되지는 않아요. 지도상 실제 보행 경로를 기준으로 시간을 잡으세요.</div>
+        </div>
+
+        <h3>투어 후 저녁 후보</h3>
+        <div class="grid">
+          <div class="mini"><h4>1. Cafe&amp;Bar FLOV</h4><div class="meta">이동 최소화 · 11:00~24:00 · 수요일 휴무 · ¥2,000~4,500</div><p>투어 집결지 자체가 카페·바. 2026년 9월 리뉴얼 오픈, 미야코지마 식재료를 쓴 식사와 음료.</p></div>
+          <div class="mini"><h4>2. 메시바루 파이나 테라스</h4><div class="meta">해변 전망 · 17:00~21:00 · 수요일 휴무 확인</div><p>파이나가마 해변이 보이는 2층 다이닝 바. 타코라이스 등 캐주얼한 식사.</p></div>
+          <div class="mini"><h4>3. Bocca burger</h4><div class="meta">간편한 저녁 · 17:00~19:30</div><p>미야코규 버거. 저녁 영업이 짧아 조금 서둘러야 해요.</p></div>
+        </div>
+        <p class="note">추천 순서: 파이나가마 해변 산책 → 파이나 테라스에서 저녁 → FLOV에서 음료 → 택시로 힐튼 복귀. 니시자토 야간 쇼핑·이자카야는 3일 차에 넣는 편이 여유로워요.</p>
+
+        <h3>확정 전에 체크할 사항 <span class="check-count" id="checkCount"></span></h3>
+        <div class="box" id="checklist">
+          <label class="check"><input type="checkbox" data-key="c1"> 야비지 투어 실제 집결 마감시간 확인</label>
+          <label class="check"><input type="checkbox" data-key="c2"> 투어 종료 장소가 FLOV와 동일한지 확인</label>
+          <label class="check"><input type="checkbox" data-key="c3"> 젖은 수영복과 장비 보관·샤워 가능 여부 확인</label>
+          <label class="check"><input type="checkbox" data-key="c4"> 2일 차 저녁 식당 영업일 및 예약 확인</label>
+          <p class="note">야비지 투어는 날씨와 해상 상황에 영향을 받으니 업체의 취소·변경 안내도 확인하세요. 체크 표시는 이 브라우저에만 저장돼요.</p>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="eyebrow">렌터카 없는 추천 코스</div>
+        <h2>남은 날에 골라 넣기</h2>
+        <div class="grid">
+          <div class="course">
+            <div class="tag">COURSE 01 · 도보 중심</div>
+            <h4>힐튼에서 느긋하게 보내는 하루</h4>
+            <ol>
+              <li>09:00 더그스 커피 &amp; 마트에서 커피</li>
+              <li>11:30 보카 버거에서 점심</li>
+              <li>13:00 파이나가마 해변 산책</li>
+              <li>14:00 블루 부스에서 음료</li>
+              <li>15:00 편의점 쇼핑 후 호텔 복귀</li>
+              <li>17:30 힐튼에서 선셋 감상</li>
+            </ol>
+            <p class="note">한낮엔 일부 구간 택시 추천. 일몰 시간은 여행일 기준 확인.</p>
+          </div>
+          <div class="course">
+            <div class="tag">COURSE 02 · 택시 + 시내 도보</div>
+            <h4>소품샵 구경 후 로컬 맛집 저녁</h4>
+            <ol>
+              <li>15:00 힐튼에서 택시로 니시자토 거리</li>
+              <li>15:15 우민추 공방, 미야코야, 토미하마 산고</li>
+              <li>16:15 츄라시마, 츄라카지 구경</li>
+              <li>17:30~18:30 고야 또는 시마오뎅 타카라 저녁</li>
+              <li>20:00 택시로 힐튼 복귀</li>
+            </ol>
+            <p class="note">요일별 영업시간과 예약 가능 시간 확인 후 순서 조정.</p>
+          </div>
+          <div class="course">
+            <div class="tag">COURSE 03 · 택시 2~3회</div>
+            <h4>로컬 마켓과 미야코 소바</h4>
+            <ol>
+              <li>10:00 시마노에키 미야코 특산품 구경</li>
+              <li>11:30 코자 소바에서 점심</li>
+              <li>13:00 더그스 커피 본점 커피·디저트</li>
+              <li>14:00 힐튼으로 돌아와 휴식</li>
+            </ol>
+            <p class="note">장소 간 거리가 있어 택시비가 상대적으로 더 드는 코스.</p>
+          </div>
+        </div>
+      </div>
+
+    </div></div>
+  </section>
+
+  <!-- ========== 여행 정보 탭 ========== -->
+  <section class="view" id="infoView">
+    <div class="page"><div class="page-inner">
+
+      <div class="section">
+        <div class="eyebrow">ABOUT THIS GUIDE</div>
+        <h2>렌터카 없이 즐기는 미야코지마</h2>
+        <p>유명 관광지를 최대한 많이 도는 여행이 아니라, 힐튼에서 여유롭게 쉬고 · 걸어서 카페와 바다를 즐기고 · 택시로 시내에 나가 맛있는 음식과 작은 가게를 구경하는 여행에 맞춘 가이드예요.</p>
+        <p class="note">2026년 10월 기준으로 정리했어요. 영업시간·이동 정보는 출발 전에 다시 확인하세요.</p>
+      </div>
+
+      <div class="section">
+        <div class="eyebrow">01 · 이동 구조</div>
+        <h2>힐튼 기준 이동 구조</h2>
+        <p>힐튼 오키나와 미야코 아일랜드 리조트(550-7 Hirara Kugai)는 시내 중심에서 약 2km, 파이나가마 해변에서 약 1km 떨어져 있어요. 실제 도보 경로는 더 길 수 있어요.</p>
+        <div class="box" style="padding:0; overflow:hidden;">
+          <table>
+            <thead><tr><th>구역</th><th>이동 방식</th><th>추천 활동</th></tr></thead>
+            <tbody>
+              <tr><td>힐튼·인접 상업시설</td><td>도보 약 5~10분</td><td>커피, 가벼운 식사</td></tr>
+              <tr><td>파이나가마 해변 일대</td><td>도보 약 15~30분</td><td>맛집, 카페, 편의점, 산책</td></tr>
+              <tr><td>히라라 시내 중심</td><td>택시 약 5~10분</td><td>맛집, 이자카야, 쇼핑</td></tr>
+              <tr><td>시내 외곽</td><td>택시 약 10~15분</td><td>로컬 식당, 마켓, 잡화점</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="note">이동 시간은 계획용 추정치이며 실측 경로 시간이 아니에요.</p>
+      </div>
+
+      <div class="section">
+        <div class="eyebrow">02 · 호텔 주변 팁</div>
+        <h2>호텔 바로 옆 & 편의점</h2>
+        <div class="grid">
+          <div class="mini"><h4>더그스 커피 &amp; 마트</h4><div class="meta">최우선 추천 · 08:00~22:00 · 연중무휴</div><p>힐튼과 같은 Yard Miyakojima 단지. 스페셜티 커피, 튜나 샐러드, 기념품. 2026년 오픈이라 예전 후기엔 잘 안 나와요.</p></div>
+          <div class="mini"><h4>캐노피 바이 힐튼 레스토랑</h4><div class="meta">힐튼 숙박객 이용 가능</div><p>늦은 저녁 택시 잡기 부담스러운 날 활용하기 좋아요.</p></div>
+          <div class="mini"><h4>패밀리마트 파이나가마비치점</h4><div class="meta">24시간 · Shimozato-246 Hirara</div><p>도시락·생필품은 여기가 확실해요. 더그스 마트는 일반 편의점과 달라요. 해변 가는 길에 같이 들르기.</p></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="eyebrow">03 · 택시 실전 가이드</div>
+        <h2>택시 이용하기</h2>
+        <p>미야코지마는 차를 잡기 어려운 시간대가 있어요. 렌터카가 없다면 돌아오는 택시 확보가 중요해요.</p>
+        <div class="box">
+          <p><b>추천 앱: DiDi</b> — 공식 서비스 지역에 미야코지마시가 포함돼 있어요. 실시간 배차가 안 될 수 있으니 호텔 프런트에 택시 요청도 함께 활용하세요.</p>
+          <p><b>예산:</b> 힐튼~시내 짧은 이동 편도 약 1,000~2,000엔 (임시 추정, 앱 예상 요금으로 조정).</p>
+        </div>
+        <h3>택시에서 보여줄 일본어</h3>
+        <div class="phrase"><div><div class="jp">ヒルトン沖縄宮古島リゾートまでお願いします。</div><div class="ko">힐튼 오키나와 미야코지마 리조트까지 부탁드립니다.</div></div><button class="btn" data-copy="ヒルトン沖縄宮古島リゾートまでお願いします。">복사</button></div>
+        <div class="phrase"><div><div class="jp">西里通りまでお願いします。</div><div class="ko">니시자토 거리까지 부탁드립니다.</div></div><button class="btn" data-copy="西里通りまでお願いします。">복사</button></div>
+        <div class="phrase"><div><div class="jp">Cafe&amp;Bar FLOV（平良下里108-17）までお願いします。</div><div class="ko">Cafe&amp;Bar FLOV(투어 집결지)까지 부탁드립니다.</div></div><button class="btn" data-copy="Cafe&Bar FLOV（平良下里108-17）までお願いします。">복사</button></div>
+      </div>
+
+      <div class="section">
+        <div class="eyebrow">04 · 활용 팁</div>
+        <h2>가장 추천하는 곳</h2>
+        <p>힐튼 바로 옆 <b>더그스 커피 &amp; 마트</b>, 파이나가마의 <b>보카 버거</b>, <b>니시자토 거리 소품샵</b>, <b>시마오뎅 타카라</b>, <b>시마노에키 미야코</b>.</p>
+        <p class="note">힐튼 주변 + 히라라 시내 중심의 1차 가이드예요. 숙소에서 무리 없이 다녀올 수 있는 생활권 여행을 우선으로 구성했어요.</p>
+      </div>
+
+    </div></div>
+  </section>
+
+  <!-- Leaflet 지도 라이브러리 (API 키 불필요) -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
+    // type: stay | food | cafe | shop | spot | tour
+    // zone: stay(출발점) | walk(힐튼 도보권) | city(택시)
+    // approx: 정확한 위치 미확인 (대략적 위치)
+    const gmap = q => 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(q);
+
     const places = [
-      {
-        id: 0,
-        name: "힐튼 오키나와 미야코 아일랜드 리조트",
-        cat: "숙소 (출발점)",
-        type: "spot",
-        zone: "walk",
-        zoneLabel: "도보 출발점",
-        lat: 24.80134,
-        lng: 125.25895,
-        desc: "투리바 해변공원 부지에 위치한 베이스캠프. 도보 및 시내 코스의 출발점입니다.",
-        mapUrl: "https://maps.google.com/?q=Hilton+Okinawa+Miyako+Island+Resort"
-      },
-      {
-        id: 1,
-        name: "Bocca burger (보카 버거)",
-        cat: "수제버거 / 브런치",
-        type: "food",
-        zone: "walk",
-        zoneLabel: "힐튼 도보 10~12분",
-        lat: 24.80035,
-        lng: 125.26765,
-        desc: "미야코규 패티 육즙이 풍부한 인기 수제버거집. 오전 9시 오픈으로 브런치나 포장에 좋습니다.",
-        mapUrl: "https://maps.google.com/?q=Bocca+burger+Miyakojima"
-      },
-      {
-        id: 2,
-        name: "블루실 카페 파이나가마점",
-        cat: "디저트 / 카페",
-        type: "food",
-        zone: "walk",
-        zoneLabel: "힐튼 도보 10~12분",
-        lat: 24.80011,
-        lng: 125.26781,
-        desc: "오키나와 명물 블루실 아이스크림. 자색고구마, 소금 친스코 맛 추천.",
-        mapUrl: "https://maps.google.com/?q=Blue+Seal+Miyakojima+Pai+Nagama"
-      },
-      {
-        id: 3,
-        name: "미야코규 철판구이 유키시오 스테이크",
-        cat: "와규 철판구이",
-        type: "food",
-        zone: "walk",
-        zoneLabel: "힐튼 도보 10~12분",
-        lat: 24.80020,
-        lng: 125.26770,
-        desc: "특산 눈소금(유키시오)과 미야코규의 조합. 눈앞에서 구워주는 철판구이 (예약 권장).",
-        mapUrl: "https://maps.google.com/?q=Miyako+Beef+Teppanyaki+Yukisio+Steak"
-      },
-      {
-        id: 4,
-        name: "파이나가마 비치",
-        cat: "해변 / 일몰 산책",
-        type: "spot",
-        zone: "walk",
-        zoneLabel: "힐튼 도보 13~15분",
-        lat: 24.80327,
-        lng: 125.27010,
-        desc: "산책 데크가 잘 조성된 시민 해변 공원. 저녁 노을 산책 코스로 좋습니다.",
-        mapUrl: "https://maps.google.com/?q=Painagama+Beach"
-      },
-      {
-        id: 5,
-        name: "패밀리마트 파이나가마비치점",
-        cat: "24시 편의점",
-        type: "spot",
-        zone: "walk",
-        zoneLabel: "힐튼 도보 14~15분",
-        lat: 24.80350,
-        lng: 125.27130,
-        desc: "파이나가마 비치 맞은편 24시간 편의점. 음료, 간식, 오리온 맥주 구매 추천.",
-        mapUrl: "https://maps.google.com/?q=FamilyMart+Miyako+Pina+Gama+Beach"
-      },
-      {
-        id: 6,
-        name: "고자소바야 (古謝そば屋)",
-        cat: "미야코 소바 노포",
-        type: "food",
-        zone: "city",
-        zoneLabel: "시내 (차량 6분)",
-        lat: 24.79720,
-        lng: 125.28910,
-        desc: "가쓰오 육수의 깔끔하고 깊은 맛. 소키 소바와 쥬시 밥 세트 인기.",
-        mapUrl: "https://maps.google.com/?q=Koja+Sobaya+Miyakojima"
-      },
-      {
-        id: 7,
-        name: "미야코규 야키니쿠 키하치 별관",
-        cat: "미야코규 숯불구이",
-        type: "food",
-        zone: "city",
-        zoneLabel: "시내 (차량 5분)",
-        lat: 24.80375,
-        lng: 125.28110,
-        desc: "고품질 미야코규를 숯불에 구워 즐기는 인기 야키니쿠집 (예약 필수).",
-        mapUrl: "https://maps.google.com/?q=Kihachi+Bekkan+Miyakojima"
-      },
-      {
-        id: 8,
-        name: "다이와 식당 (大和食堂)",
-        cat: "로컬 대중식당",
-        type: "food",
-        zone: "city",
-        zoneLabel: "시내 (차량 5분)",
-        lat: 24.80630,
-        lng: 125.28450,
-        desc: "소바와 참푸루, 카츠동이 맛있는 정겨운 현지 식당. 카레가루 조합 추천.",
-        mapUrl: "https://maps.google.com/?q=Daiwa+Shokudo+Miyakojima"
-      },
-      {
-        id: 9,
-        name: "시마오뎅 타카라",
-        cat: "오키나와 오뎅 노포",
-        type: "food",
-        zone: "city",
-        zoneLabel: "시내 (차량 5분)",
-        lat: 24.80410,
-        lng: 125.28180,
-        desc: "테비치(족발) 오뎅과 오징어 먹물 볶음이 일품인 로컬 심야 주점.",
-        mapUrl: "https://maps.google.com/?q=Shima+Oden+Takara+Miyakojima"
-      },
-      {
-        id: 10,
-        name: "아카가-라",
-        cat: "산신 민요 라이브 주점",
-        type: "food",
-        zone: "city",
-        zoneLabel: "시내 (차량 5분)",
-        lat: 24.80320,
-        lng: 125.28120,
-        desc: "오키나와 전통 악기 산신 라이브 연주를 들으며 즐기는 향토 이자카야.",
-        mapUrl: "https://maps.google.com/?q=Akagara+Miyakojima"
-      },
-      {
-        id: 11,
-        name: "시마노에키 미야코",
-        cat: "특산물 / 기념품 마켓",
-        type: "spot",
-        zone: "city",
-        zoneLabel: "시내 (차량 6분)",
-        lat: 24.80045,
-        lng: 125.28590,
-        desc: "망고, 눈소금 과자, 로컬 간식 등 미야코 특산물을 쇼핑하기 좋은 마켓.",
-        mapUrl: "https://maps.google.com/?q=Shimanoneki+Miyako"
-      },
-      {
-        id: 12,
-        name: "미야코 신사 & 하리미즈우타키",
-        cat: "유적 / 전망 명소",
-        type: "spot",
-        zone: "city",
-        zoneLabel: "시내 (차량 4분)",
-        lat: 24.80710,
-        lng: 125.27980,
-        desc: "일본 최남단 붉은 기와 신사와 성스러운 숲. 바다 전망이 좋습니다.",
-        mapUrl: "https://maps.google.com/?q=Miyako+Shrine"
-      }
+      // ---- 힐튼 & 바로 옆 ----
+      { id: 0, name: "힐튼 오키나와 미야코 아일랜드 리조트", jp: "ヒルトン沖縄宮古島リゾート", cat: "숙소 (출발점)", type: "stay", zone: "stay", zoneLabel: "출발점", lat: 24.80100, lng: 125.25962, day2: true,
+        desc: "투리바 해변공원 부지의 베이스캠프. 바다 전망, 선셋, 수영장, 호텔 주변 산책.", mapUrl: gmap("Hilton Okinawa Miyako Island Resort") },
+      { id: 1, name: "더그스 커피 & 마트", jp: "DOUG'S COFFEE & MART", cat: "커피·마트", type: "cafe", zone: "walk", zoneLabel: "힐튼 도보 5~10분", lat: 24.79985, lng: 125.26035, pick: true, approx: true,
+        desc: "힐튼과 같은 Yard Miyakojima 단지. 스페셜티 커피, 더그스 튜나 샐러드, 기념품. 조식 안 먹는 날 아침 커피로 추천.", hours: "08:00~22:00 · 연중무휴", mapUrl: gmap("DOUG'S COFFEE & MART Miyakojima") },
+      { id: 2, name: "캐노피 바이 힐튼 레스토랑", jp: "Canopy by Hilton", cat: "호텔 레스토랑", type: "food", zone: "walk", zoneLabel: "힐튼 바로 옆", lat: 24.79943, lng: 125.25916,
+        desc: "힐튼 숙박객도 이용 가능. 늦은 저녁 택시 잡기 부담스러운 날에 좋아요.", mapUrl: gmap("Canopy by Hilton Okinawa Miyako Island Resort") },
+
+      // ---- 파이나가마 방면 (도보) ----
+      { id: 3, name: "Bocca burger (보카 버거)", jp: "Bocca burger", cat: "수제버거 / 브런치", type: "food", zone: "walk", zoneLabel: "힐튼 도보 약 1km", lat: 24.79970, lng: 125.26948, pick: true, day2: true,
+        desc: "미야코규 패티 버거가 대표 메뉴. 해변 가는 날 점심으로 가장 먼저 추천. DAY 2 저녁 후보.", hours: "09:00~15:30 / 17:00~19:30", mapUrl: gmap("Bocca burger Miyakojima") },
+      { id: 4, name: "Pasta House Niwa", jp: "パスタハウス ニワ", cat: "이탈리안", type: "food", zone: "walk", zoneLabel: "힐튼 도보 약 1km", lat: 24.79913, lng: 125.26917,
+        desc: "파스타가 먹고 싶은 날 후보. 호텔 인근 식당 중 평가가 좋은 곳. 저녁 영업 여부 확인 후 방문.", mapUrl: gmap("Pasta House Niwa Miyakojima") },
+      { id: 5, name: "블루실 카페 파이나가마점", jp: "BLUE SEAL", cat: "아이스크림", type: "cafe", zone: "walk", zoneLabel: "힐튼 도보 10~12분", lat: 24.80011, lng: 125.26781, approx: true,
+        desc: "오키나와 명물 블루실 아이스크림. 자색고구마, 소금 친스코 맛 추천.", mapUrl: gmap("Blue Seal Miyakojima Painagama") },
+      { id: 6, name: "미야코규 철판구이 유키시오 스테이크", jp: "雪塩ステーキ", cat: "와규 철판구이", type: "food", zone: "walk", zoneLabel: "힐튼 도보 10~12분", lat: 24.80020, lng: 125.26770, approx: true,
+        desc: "특산 눈소금과 미야코규의 조합. 눈앞에서 구워주는 철판구이 (예약 권장).", mapUrl: gmap("Miyako Beef Teppanyaki Yukisio Steak") },
+      { id: 7, name: "파이나가마 블루 부스", jp: "PAINAGAMA BLUE BOOTH", cat: "해변 카페", type: "cafe", zone: "walk", zoneLabel: "힐튼 도보 약 1.2~1.8km", lat: 24.80062, lng: 125.27160,
+        desc: "미야코도그, 과일 음료, 스무디. 바다 산책 후 쉬어가기 좋아요.", hours: "09:00~18:00 · 월요일 휴무", mapUrl: gmap("PAINAGAMA BLUE BOOTH") },
+      { id: 8, name: "패밀리마트 파이나가마비치점", jp: "ファミリーマート 宮古パイナガマビーチ店", cat: "24시 편의점", type: "spot", zone: "walk", zoneLabel: "힐튼 도보 15분 이상", lat: 24.80028, lng: 125.27218, day2: true,
+        desc: "파이나가마 해변 앞. 간식·도시락·음료·생필품은 여기서. 주소: Shimozato-246 Hirara.", hours: "24시간", mapUrl: gmap("FamilyMart Miyako Pina Gama Beach") },
+      { id: 9, name: "파이나가마 비치", jp: "パイナガマビーチ", cat: "해변 / 일몰 산책", type: "spot", zone: "walk", zoneLabel: "힐튼 도보 15분 이상", lat: 24.80293, lng: 125.27175, day2: true,
+        desc: "산책 데크가 잘 조성된 시민 해변. 투어 후 노을 산책 코스로 좋아요.", mapUrl: gmap("Painagama Beach") },
+      { id: 10, name: "Cafe&Bar FLOV (야비지 투어 집결지)", jp: "Cafe&Bar FLOV", cat: "카페·바 · DAY 2 집결지", type: "tour", zone: "walk", zoneLabel: "힐튼 도보 약 36분", lat: 24.80539, lng: 125.27389, day2: true,
+        desc: "야비지 투어(12:45~17:10) 집결지. 2026년 9월 리뉴얼, 미야코지마 식재료 식사와 음료. 투어 후 머물기 좋아요. 주소: 平良下里108-17.", hours: "11:00~24:00 · 수요일 휴무 · ¥2,000~4,500", mapUrl: gmap("Cafe&Bar FLOV 沖縄県宮古島市平良下里108-17") },
+      { id: 11, name: "메시바루 파이나 테라스", jp: "メシバル パイナテラス", cat: "해변 전망 다이닝 바", type: "food", zone: "walk", zoneLabel: "FLOV 도보 약 10분", lat: 24.80326, lng: 125.27387, day2: true, approx: true,
+        desc: "파이나가마 해변이 보이는 2층 다이닝 바. 타코라이스 등 캐주얼한 식사. DAY 2 저녁 1순위 후보.", hours: "17:00~21:00 · 수요일 휴무 확인", mapUrl: gmap("Meshival Paina Terrace Miyakojima") },
+
+      // ---- 히라라 시내 맛집 (택시) ----
+      { id: 12, name: "시마오뎅 타카라", jp: "島おでん たから", cat: "오키나와 오뎅 · 저녁", type: "food", zone: "city", zoneLabel: "시내 · 택시 5~10분", lat: 24.80640, lng: 125.27872, pick: true,
+        desc: "테비치(족발)가 들어간 오키나와식 오뎅으로 유명한 로컬 식당. 오래된 이자카야 분위기. 예약 추천.", hours: "18:00~23:00 · 월·일 휴무", mapUrl: gmap("島おでん たから 宮古島") },
+      { id: 13, name: "고야 (郷家)", jp: "泡盛と沖縄料理 郷家", cat: "향토요리 · 산신 라이브", type: "food", zone: "city", zoneLabel: "시내 · 택시 5~10분", lat: 24.80191, lng: 125.28323,
+        desc: "바다포도, 모즈쿠, 지마미 두부. 산신 라이브 공연이 특징이라 여행 분위기 느끼기 좋아요.", hours: "17:30~22:00 · 공연 일정 확인", mapUrl: gmap("郷家 宮古島") },
+      { id: 14, name: "주잔 (海鮮酒家 中山)", jp: "海鮮酒家 中山", cat: "해산물 이자카야", type: "food", zone: "city", zoneLabel: "시내 · 택시 5~10분", lat: 24.80696, lng: 125.28001,
+        desc: "사시미, 생선구이, 초밥과 오키나와식 반찬. 여러 메뉴 나눠 먹기 좋아요. 예약 추천.", hours: "16:00~24:00 · 휴무 확인", mapUrl: gmap("海鮮酒家 中山 宮古島") },
+      { id: 15, name: "고자소바야 (古謝そば屋)", jp: "古謝そば屋", cat: "미야코 소바 · 점심", type: "food", zone: "city", zoneLabel: "시내 외곽 · 택시 10~15분", lat: 24.79051, lng: 125.28439,
+        desc: "미야코지마 전통 소바 대표 후보. 소키 소바와 쥬시 밥 함께.", hours: "11:00~16:00", mapUrl: gmap("古謝そば屋 宮古島") },
+      { id: 16, name: "더그스 버거 본점", jp: "DOUG'S BURGER 宮古島本店", cat: "수제버거", type: "food", zone: "city", zoneLabel: "시모자토 · 택시 10분", lat: 24.79583, lng: 125.28632,
+        desc: "타라마규 버거·참치 버거. 보카 버거와 비교해 보는 재미. 더그스 커피 본점과 묶어서 방문.", mapUrl: gmap("DOUG'S BURGER 宮古島本店") },
+      { id: 17, name: "더그스 커피 본점", jp: "DOUG'S COFFEE 宮古島本店", cat: "커피·디저트", type: "cafe", zone: "city", zoneLabel: "시모자토 · 택시 10분", lat: 24.79600, lng: 125.28662,
+        desc: "커피·치즈케이크·망고 스무디. 더그스 버거 식사 후 디저트 코스.", mapUrl: gmap("DOUG'S COFFEE 宮古島本店") },
+      { id: 18, name: "미야코규 야키니쿠 키하치 별관", jp: "喜八 別館", cat: "미야코규 숯불구이", type: "food", zone: "city", zoneLabel: "시내 · 택시 5~10분", lat: 24.80375, lng: 125.28110, approx: true,
+        desc: "고품질 미야코규 숯불 야키니쿠 (예약 필수).", mapUrl: gmap("Kihachi Bekkan Miyakojima") },
+      { id: 19, name: "다이와 식당", jp: "大和食堂", cat: "로컬 대중식당", type: "food", zone: "city", zoneLabel: "시내 · 택시 5~10분", lat: 24.80630, lng: 125.28450, approx: true,
+        desc: "소바, 참푸루, 카츠동이 맛있는 정겨운 현지 식당.", mapUrl: gmap("大和食堂 宮古島") },
+      { id: 20, name: "아카가-라", jp: "あかがーら", cat: "산신 민요 라이브 주점", type: "food", zone: "city", zoneLabel: "시내 · 택시 5~10분", lat: 24.80320, lng: 125.28120, approx: true,
+        desc: "산신 라이브 연주를 들으며 즐기는 향토 이자카야.", mapUrl: gmap("Akagara Miyakojima") },
+
+      // ---- 니시자토 거리 소품샵 ----
+      { id: 21, name: "우민추 공방", jp: "海人工房", cat: "그래픽 티셔츠·잡화", type: "shop", zone: "city", zoneLabel: "니시자토 거리", lat: 24.80504, lng: 125.28084, pick: true,
+        desc: "섬 감성 그래픽 티셔츠, 가방, 잡화. SPAM·블루씰 등 오키나와 모티브 디자인. (225-2 Nishizato)", mapUrl: gmap("海人工房 宮古島 西里") },
+      { id: 22, name: "류큐민예 미야코야", jp: "琉球民芸みやげ品みやこ屋", cat: "종합 기념품점", type: "shop", zone: "city", zoneLabel: "니시자토 거리", lat: 24.80477, lng: 125.28042,
+        desc: "과자, 향신료, 티셔츠, 전통 잡화. 오키나와 특산품을 한 번에 비교. (238 Nishizato)", hours: "09:00~21:00", mapUrl: gmap("琉球民芸みやげ品みやこ屋") },
+      { id: 23, name: "토미하마 산고", jp: "富浜産業", cat: "로컬 굿즈", type: "shop", zone: "city", zoneLabel: "니시자토 거리", lat: 24.80490, lng: 125.28060, approx: true,
+        desc: "미야코지마 상징 마모루군 상품, 티셔츠, 재미있는 로컬 굿즈. (240-1 Nishizato)", hours: "10:00~21:00", mapUrl: gmap("富浜産業 宮古島 西里") },
+      { id: 24, name: "오미야게 쇼텐 츄라시마", jp: "おみやげ商店 ちゅらしま", cat: "캐릭터·컬러풀 기념품", type: "shop", zone: "city", zoneLabel: "니시자토 거리", lat: 24.80462, lng: 125.28024, approx: true,
+        desc: "캐릭터 상품, 귀여운 티셔츠, 사진 찍기 좋은 알록달록한 기념품. (241 Nishizato)", hours: "오후~야간", mapUrl: gmap("おみやげ商店 ちゅらしま 宮古島") },
+      { id: 25, name: "츄라카지", jp: "ちゅらかじ", cat: "바다·섬 테마 잡화", type: "shop", zone: "city", zoneLabel: "니시자토 거리", lat: 24.80382, lng: 125.28138,
+        desc: "오리지널 잡화와 기념품. 저녁 식사 전에 둘러보기 좋아요. (300-5 Nishizato)", hours: "15:00~22:00", mapUrl: gmap("ちゅらかじ 宮古島") },
+      { id: 26, name: "아이사리", jp: "愛さりぃ", cat: "수공예 소품샵", type: "shop", zone: "city", zoneLabel: "쿠가이 · 별도 택시", lat: 24.79446, lng: 125.27545,
+        desc: "바다거북 키링, 레진 소품, 수공예 액세서리. 소장하고 싶은 독특한 물건이 목적이면 여기부터. 니시자토와 떨어져 있어요. (891-1 Kugai)", hours: "10:00~16:00", mapUrl: gmap("愛さりぃ 宮古島") },
+      { id: 27, name: "시마노에키 미야코", jp: "島の駅みやこ", cat: "특산품 로컬 마켓", type: "shop", zone: "city", zoneLabel: "택시 5~10분", lat: 24.80045, lng: 125.28590, pick: true, approx: true,
+        desc: "현지 채소, 과일, 눈소금, 과자, 가공식품. 현지인이 실제로 먹는 식재료까지 구경. 제철 과일은 시기에 따라 달라요.", hours: "07:30~18:00 · 연중무휴", mapUrl: gmap("島の駅みやこ") },
+      { id: 28, name: "미야코 신사 & 하리미즈우타키", jp: "宮古神社", cat: "유적 / 전망 명소", type: "spot", zone: "city", zoneLabel: "시내 · 택시 5분", lat: 24.80768, lng: 125.28050,
+        desc: "일본 최남단 붉은 기와 신사와 성스러운 숲. 바다 전망이 좋아요.", mapUrl: gmap("宮古神社") }
     ];
+
+    const TYPE_EMOJI = { stay: '🏨', food: '🍜', cafe: '☕', shop: '🛍️', spot: '🏖️', tour: '🤿' };
+    const ZONE_COLOR = { stay: '#dc2626', walk: '#059669', city: '#2563eb' };
+    const ZONE_CLASS = { stay: 'zone-stay', walk: 'zone-walk', city: 'zone-city' };
+    const FILTER_NOTE = {
+      day2: 'DAY 2 동선: 힐튼 → (도보 약 36분) → FLOV 집결 → 투어 → 파이나가마 해변 산책 → 저녁 → 택시 복귀',
+      walk: '힐튼에서 걸어갈 수 있는 곳. 한낮엔 일부 구간 택시도 추천.',
+      city: '히라라 시내·외곽. 힐튼에서 택시 약 5~15분.',
+      shop: '니시자토 거리 가게들은 모여 있어 택시에서 내려 한 번에 돌아보기 좋아요.'
+    };
 
     let map;
     const markers = {};
 
-    // 힐튼: 빨강, 도보권: 초록, 시내: 파랑
-    function pinIcon(color) {
+    function pinIcon(p) {
+      const color = p.type === 'tour' ? '#f97316' : ZONE_COLOR[p.zone];
       return L.divIcon({
         className: '',
-        html: `<div style="width:18px;height:18px;border-radius:50%;background:${color};border:3px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,0.4);"></div>`,
-        iconSize: [18, 18],
-        iconAnchor: [9, 9],
-        popupAnchor: [0, -10]
+        html: `<div class="pin" style="border-color:${color}">${TYPE_EMOJI[p.type]}</div>`,
+        iconSize: [30, 30],
+        iconAnchor: [15, 15],
+        popupAnchor: [0, -16]
       });
     }
 
-    function initMap() {
-      // 힐튼 리조트와 시내 사이 육지 중심점
-      map = L.map('map', { zoomControl: true }).setView([24.8030, 125.2720], 15);
+    function matches(p, filter) {
+      if (filter === 'all') return true;
+      if (filter === 'day2') return !!p.day2;
+      if (filter === 'walk' || filter === 'city') return p.zone === filter || p.id === 0;
+      return p.type === filter;
+    }
 
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; OpenStreetMap contributors'
+    function initMap() {
+      map = L.map('map', { zoomControl: true }).setView([24.8020, 125.2720], 15);
+
+      // 구글 지도 타일 (hl=ko: 지명 한글 표시)
+      L.tileLayer('https://mt{s}.google.com/vt/lyrs=m&hl=ko&gl=KR&x={x}&y={y}&z={z}', {
+        subdomains: ['0', '1', '2', '3'],
+        maxZoom: 20,
+        attribution: '&copy; Google'
       }).addTo(map);
 
       places.forEach(p => {
-        const color = p.id === 0 ? '#dc2626' : (p.zone === 'walk' ? '#059669' : '#2563eb');
         const content = `
           <div style="font-size:13px; line-height:1.4; max-width:240px;">
             <b style="font-size:14px; color:#0f172a;">${p.name}</b><br>
             <span style="color:#64748b; font-size:11px;">${p.zoneLabel} · ${p.cat}</span>
             <p style="margin:6px 0; color:#334155;">${p.desc}</p>
+            ${p.hours ? `<p style="margin:0 0 6px; color:#0f172a; font-size:12px;">🕒 ${p.hours}</p>` : ''}
             <a href="${p.mapUrl}" target="_blank" style="color:#2563eb; font-weight:bold; text-decoration:none; font-size:12px;">구글 지도에서 열기 ↗</a>
           </div>
         `;
-
-        const marker = L.marker([p.lat, p.lng], { icon: pinIcon(color), title: p.name })
+        const marker = L.marker([p.lat, p.lng], { icon: pinIcon(p), title: p.name, zIndexOffset: p.id === 0 || p.type === 'tour' ? 1000 : 0 })
           .addTo(map)
           .bindPopup(content);
-
         marker.on('click', () => highlightCard(p.id));
         markers[p.id] = marker;
       });
@@ -263,45 +444,48 @@
 
     function renderPlaces(filter = 'all') {
       const listEl = document.getElementById('placesList');
-      listEl.innerHTML = '';
+      listEl.innerHTML = FILTER_NOTE[filter] ? `<p class="list-note">${FILTER_NOTE[filter]}</p>` : '';
+      const shown = [];
 
       places.forEach(p => {
-        let match = false;
-        if (filter === 'all') match = true;
-        else if (filter === 'walk' && p.zone === 'walk') match = true;
-        else if (filter === 'city' && p.zone === 'city') match = true;
-        else if (filter === 'food' && p.type === 'food') match = true;
-        else if (filter === 'spot' && p.type === 'spot') match = true;
-
+        const match = matches(p, filter);
         const marker = markers[p.id];
         if (marker) {
           if (match) marker.addTo(map);
           else marker.remove();
         }
+        if (!match) return;
+        shown.push([p.lat, p.lng]);
 
-        if (match) {
-          const card = document.createElement('div');
-          card.className = 'card';
-          card.id = `card-${p.id}`;
-          card.onclick = () => focusPlace(p.id);
-          card.innerHTML = `
-            <span class="card-zone ${p.zone === 'walk' ? 'zone-walk' : 'zone-city'}">${p.zoneLabel}</span>
-            <div class="card-title">${p.name}</div>
-            <div class="card-cat">📍 ${p.cat}</div>
-            <div class="card-desc">${p.desc}</div>
-            <a href="${p.mapUrl}" target="_blank" class="card-btn" onclick="event.stopPropagation()">구글 지도 길찾기 ↗</a>
-          `;
-          listEl.appendChild(card);
-        }
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.id = `card-${p.id}`;
+        card.onclick = () => focusPlace(p.id);
+        card.innerHTML = `
+          <div class="card-top">
+            <span class="chip ${ZONE_CLASS[p.zone]}">${p.zoneLabel}</span>
+            ${p.pick ? '<span class="chip chip-pick">⭐ 추천</span>' : ''}
+            ${p.day2 && p.id !== 0 ? '<span class="chip chip-day2">DAY 2</span>' : ''}
+          </div>
+          <div class="card-title">${p.name}</div>
+          <div class="card-jp">${p.jp}</div>
+          <div class="card-cat">${TYPE_EMOJI[p.type]} ${p.cat}</div>
+          <div class="card-desc">${p.desc}</div>
+          ${p.hours ? `<div class="card-hours">🕒 ${p.hours}</div>` : ''}
+          ${p.approx ? '<div class="card-approx">※ 지도 핀은 대략적인 위치예요. 정확한 위치는 구글 지도에서 확인하세요.</div>' : ''}
+          <a href="${p.mapUrl}" target="_blank" class="card-btn" onclick="event.stopPropagation()">구글 지도 길찾기 ↗</a>
+        `;
+        listEl.appendChild(card);
       });
+
+      if (map && shown.length) map.fitBounds(shown, { padding: [40, 40], maxZoom: 16 });
     }
 
     function focusPlace(id) {
       const p = places.find(x => x.id === id);
       const marker = markers[id];
       if (!p || !marker) return;
-
-      map.setView([p.lat, p.lng], 16);
+      map.setView([p.lat, p.lng], 17);
       marker.openPopup();
       highlightCard(id);
     }
@@ -315,13 +499,70 @@
       }
     }
 
-    function filterPlaces(filter, btn) {
-      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
+    function setFilter(filter) {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b.dataset.filter === filter));
       renderPlaces(filter);
     }
 
-    window.onload = initMap;
+    function showView(id) {
+      document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === id));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.view === id));
+      if (id === 'mapView' && map) setTimeout(() => map.invalidateSize(), 0);
+    }
+
+    // 체크리스트 (이 브라우저에만 저장)
+    const CHECK_KEY = 'miyako-day2-checklist';
+    function loadChecks() {
+      try { return JSON.parse(localStorage.getItem(CHECK_KEY)) || {}; } catch (e) { return {}; }
+    }
+    function initChecklist() {
+      const state = loadChecks();
+      const boxes = document.querySelectorAll('#checklist input[type=checkbox]');
+      const update = () => {
+        const done = [...boxes].filter(b => b.checked).length;
+        document.getElementById('checkCount').textContent = `${done}/${boxes.length} 확인`;
+      };
+      boxes.forEach(b => {
+        b.checked = !!state[b.dataset.key];
+        b.addEventListener('change', () => {
+          state[b.dataset.key] = b.checked;
+          try { localStorage.setItem(CHECK_KEY, JSON.stringify(state)); } catch (e) {}
+          update();
+        });
+      });
+      update();
+    }
+
+    function copyText(text, btn) {
+      const done = () => { const t = btn.textContent; btn.textContent = '복사됨 ✓'; setTimeout(() => btn.textContent = t, 1500); };
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
+      } else {
+        fallbackCopy(text, done);
+      }
+    }
+    function fallbackCopy(text, done) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); done(); } catch (e) {}
+      ta.remove();
+    }
+
+    document.querySelectorAll('.tab-btn').forEach(b => b.addEventListener('click', () => showView(b.dataset.view)));
+    document.querySelectorAll('.filter-btn').forEach(b => b.addEventListener('click', () => setFilter(b.dataset.filter)));
+    document.querySelectorAll('[data-goto-filter]').forEach(b => b.addEventListener('click', () => { showView('mapView'); setFilter(b.dataset.gotoFilter); }));
+    document.querySelectorAll('[data-copy]').forEach(b => b.addEventListener('click', () => copyText(b.dataset.copy, b)));
+
+    // #plan, #info 로 바로 해당 탭 열기
+    const HASH_VIEW = { '#map': 'mapView', '#plan': 'planView', '#info': 'infoView' };
+
+    window.onload = () => {
+      initMap();
+      initChecklist();
+      if (HASH_VIEW[location.hash]) showView(HASH_VIEW[location.hash]);
+    };
   </script>
 </body>
 </html>
