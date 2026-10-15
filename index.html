@@ -4,8 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>미야코지마 힐튼 & 시내 맛집·명소 가이드</title>
-  <!-- Leaflet CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", sans-serif; }
     body { display: flex; flex-direction: column; height: 100vh; overflow: hidden; background: #f8fafc; color: #1e293b; }
@@ -23,7 +21,7 @@
     .card-zone { display: inline-block; font-size: 0.72rem; font-weight: 700; padding: 2px 7px; border-radius: 6px; margin-bottom: 6px; }
     .zone-walk { background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; }
     .zone-city { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
-    .card-title { font-size: 0.98rem; font-weight: 700; color: #0f172a; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center; }
+    .card-title { font-size: 0.98rem; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
     .card-cat { font-size: 0.76rem; color: #64748b; font-weight: 500; }
     .card-desc { font-size: 0.82rem; color: #475569; line-height: 1.45; margin-top: 6px; }
     .card-btn { display: inline-block; margin-top: 10px; font-size: 0.78rem; color: #2563eb; text-decoration: none; font-weight: 600; background: #f1f5f9; padding: 5px 10px; border-radius: 6px; }
@@ -42,11 +40,11 @@
   </header>
 
   <div class="filter-bar">
-    <button class="filter-btn active" onclick="filterPlaces('all')">전체 보기</button>
-    <button class="filter-btn" onclick="filterPlaces('walk')">🚶‍♂️ 힐튼 도보권</button>
-    <button class="filter-btn" onclick="filterPlaces('city')">🚗 시내 (차량 5분)</button>
-    <button class="filter-btn" onclick="filterPlaces('food')">🍜 맛집/카페</button>
-    <button class="filter-btn" onclick="filterPlaces('spot')">🏖️ 명소/편의</button>
+    <button class="filter-btn active" onclick="filterPlaces('all', this)">전체 보기</button>
+    <button class="filter-btn" onclick="filterPlaces('walk', this)">🚶‍♂️ 힐튼 도보권</button>
+    <button class="filter-btn" onclick="filterPlaces('city', this)">🚗 시내 (차량 5분)</button>
+    <button class="filter-btn" onclick="filterPlaces('food', this)">🍜 맛집/카페</button>
+    <button class="filter-btn" onclick="filterPlaces('spot', this)">🏖️ 명소/편의</button>
   </div>
 
   <div class="content-area">
@@ -54,20 +52,20 @@
     <div class="sidebar" id="placesList"></div>
   </div>
 
-  <!-- Leaflet JS -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- 구글 지도 API (한국어 지정) -->
+  <script src="https://maps.googleapis.com/maps/api/js?language=ko&region=KR"></script>
   <script>
     const places = [
       {
         id: 0,
-        name: "힐튼 오키나와 미야코 아일랜드",
-        cat: "기준점 (숙소)",
+        name: "힐튼 오키나와 미야코 아일랜드 리조트",
+        cat: "숙소 (출발점)",
         type: "spot",
         zone: "walk",
         zoneLabel: "도보 출발점",
-        lat: 24.81432,
-        lng: 125.26768,
-        desc: "투리버 해변공원에 자리한 럭셔리 리조트. 도보 코스의 시작점입니다.",
+        lat: 24.80134,
+        lng: 125.25895,
+        desc: "투리바 해변공원에 자리 잡은 리조트. 도보 및 시내 코스의 출발점입니다.",
         mapUrl: "https://maps.google.com/?q=Hilton+Okinawa+Miyako+Island+Resort"
       },
       {
@@ -76,22 +74,22 @@
         cat: "수제버거 / 브런치",
         type: "food",
         zone: "walk",
-        zoneLabel: "힐튼 도보 10분",
-        lat: 24.81055,
-        lng: 125.27138,
-        desc: "미야코규 패티 육즙이 풍부한 인기 수제버거집. 오전 9시 오픈으로 브런치나 포장에 제격입니다.",
+        zoneLabel: "힐튼 도보 10~12분",
+        lat: 24.80035,
+        lng: 125.26765,
+        desc: "미야코규 패티 육즙이 가득한 수제버거 맛집. 팜타운 구역 위치, 오전 9시 오픈.",
         mapUrl: "https://maps.google.com/?q=Bocca+burger+Miyakojima"
       },
       {
         id: 2,
-        name: "블루실 카페 파이나가마",
-        cat: "디저트 / 카페",
+        name: "블루실 카페 파이나가마점",
+        cat: "디저트 / 아이스크림",
         type: "food",
         zone: "walk",
-        zoneLabel: "힐튼 도보 11분",
-        lat: 24.80985,
-        lng: 125.27210,
-        desc: "오키나와 명물 블루실 아이스크림 매장. 자색고구마, 소금 친스코 맛 추천.",
+        zoneLabel: "힐튼 도보 10~12분",
+        lat: 24.80011,
+        lng: 125.26781,
+        desc: "오키나와 명물 블루실 매장. 자색고구마, 소금 친스코 맛 아이스크림 추천.",
         mapUrl: "https://maps.google.com/?q=Blue+Seal+Miyakojima+Pai+Nagama"
       },
       {
@@ -100,10 +98,10 @@
         cat: "와규 철판구이",
         type: "food",
         zone: "walk",
-        zoneLabel: "힐튼 도보 12분",
-        lat: 24.80930,
-        lng: 125.27255,
-        desc: "특산 눈소금(유키시오)과 미야코규의 조합. 눈앞에서 구워주는 디너 명소 (사전 예약 권장).",
+        zoneLabel: "힐튼 도보 10~12분",
+        lat: 24.80020,
+        lng: 125.26770,
+        desc: "특산 눈소금(유키시오)과 미야코규의 조합. 눈앞에서 구워주는 철판구이 (예약 권장).",
         mapUrl: "https://maps.google.com/?q=Miyako+Beef+Teppanyaki+Yukisio+Steak"
       },
       {
@@ -112,10 +110,10 @@
         cat: "해변 / 일몰 산책",
         type: "spot",
         zone: "walk",
-        zoneLabel: "힐튼 도보 12분",
-        lat: 24.80782,
-        lng: 125.27290,
-        desc: "산책 데크가 잘 갖춰진 로컬 비치. 노을 감상과 아침 산책하기에 최적입니다.",
+        zoneLabel: "힐튼 도보 13~15분",
+        lat: 24.80327,
+        lng: 125.27010,
+        desc: "산책 데크가 잘 조성된 시민 해변 공원. 석양 산책 코스로 좋습니다.",
         mapUrl: "https://maps.google.com/?q=Painagama+Beach"
       },
       {
@@ -124,10 +122,10 @@
         cat: "24시 편의점",
         type: "spot",
         zone: "walk",
-        zoneLabel: "힐튼 도보 14분",
-        lat: 24.80665,
-        lng: 125.27362,
-        desc: "힐튼에서 도보로 닿는 가장 가까운 24시간 편의점. 야식, 오리온 맥주 구매 추천.",
+        zoneLabel: "힐튼 도보 14~15분",
+        lat: 24.80350,
+        lng: 125.27130,
+        desc: "파이나가마 비치 맞은편 24시간 편의점. 음료, 간식, 오리온 맥주 구매 추천.",
         mapUrl: "https://maps.google.com/?q=FamilyMart+Miyako+Pina+Gama+Beach"
       },
       {
@@ -139,19 +137,19 @@
         zoneLabel: "시내 (차량 6분)",
         lat: 24.79720,
         lng: 125.28910,
-        desc: "깊고 담백한 가쓰오 육수 미야코 소바의 대표 노포. 소키 소바와 쥬시 세트 인기.",
+        desc: "가쓰오 육수의 깔끔하고 깊은 맛. 소키 소바와 쥬시 밥 세트 인기.",
         mapUrl: "https://maps.google.com/?q=Koja+Sobaya+Miyakojima"
       },
       {
         id: 7,
         name: "미야코규 야키니쿠 키하치 별관",
-        cat: "미야코규 야키니쿠",
+        cat: "미야코규 숯불구이",
         type: "food",
         zone: "city",
         zoneLabel: "시내 (차량 5분)",
         lat: 24.80375,
         lng: 125.28110,
-        desc: "최상급 미야코규 특수부위를 숯불에 구워 먹는 정통 야키니쿠집 (예약 필수).",
+        desc: "고품질 미야코규를 숯불에 구워 즐기는 인기 야키니쿠집 (예약 필수).",
         mapUrl: "https://maps.google.com/?q=Kihachi+Bekkan+Miyakojima"
       },
       {
@@ -163,7 +161,7 @@
         zoneLabel: "시내 (차량 5분)",
         lat: 24.80630,
         lng: 125.28450,
-        desc: "정겨운 분위기에서 즐기는 소바와 참푸루, 카츠동. 소바 국물에 카레가루 조합 별미.",
+        desc: "소바와 참푸루, 카츠동이 맛있는 정겨운 현지 식당. 카레가루 조합 추천.",
         mapUrl: "https://maps.google.com/?q=Daiwa+Shokudo+Miyakojima"
       },
       {
@@ -175,7 +173,7 @@
         zoneLabel: "시내 (차량 5분)",
         lat: 24.80410,
         lng: 125.28180,
-        desc: "부드러운 족발(테비치) 오뎅과 오징어 먹물 볶음이 일품인 로컬 심야 주점.",
+        desc: "테비치(족발) 오뎅과 오징어 먹물 볶음이 일품인 로컬 심야 주점.",
         mapUrl: "https://maps.google.com/?q=Shima+Oden+Takara+Miyakojima"
       },
       {
@@ -187,7 +185,7 @@
         zoneLabel: "시내 (차량 5분)",
         lat: 24.80320,
         lng: 125.28120,
-        desc: "신명 나는 오키나와 전통 악기 산신 연주와 노래를 들으며 즐기는 향토 이자카야.",
+        desc: "오키나와 전통 악기 산신 라이브 연주를 들으며 즐기는 향토 이자카야.",
         mapUrl: "https://maps.google.com/?q=Akagara+Miyakojima"
       },
       {
@@ -199,32 +197,73 @@
         zoneLabel: "시내 (차량 6분)",
         lat: 24.80045,
         lng: 125.28590,
-        desc: "애플망고, 눈소금, 사타안다기 등 미야코지마 특산품을 한자리에서 쇼핑할 수 있는 대형 직판장.",
+        desc: "망고, 눈소금 과자, 로컬 간식 등 미야코 특산물을 쇼핑하기 좋은 마켓.",
         mapUrl: "https://maps.google.com/?q=Shimanoneki+Miyako"
       },
       {
         id: 12,
         name: "미야코 신사 & 하리미즈우타키",
-        cat: "역사 / 전망 명소",
+        cat: "유적 / 전망 명소",
         type: "spot",
         zone: "city",
         zoneLabel: "시내 (차량 4분)",
         lat: 24.80710,
         lng: 125.27980,
-        desc: "일본 최남단 붉은 기와 신사와 섬의 창세 설화가 깃든 유서 깊은 성지.",
+        desc: "일본 최남단 붉은 기와 신사와 성스러운 숲. 바다 전망이 좋습니다.",
         mapUrl: "https://maps.google.com/?q=Miyako+Shrine"
       }
     ];
 
-    // 지도시작 (중심점: 힐튼과 시내 중간)
-    const map = L.map('map').setView([24.8085, 125.2780], 14);
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '© OpenStreetMap'
-    }).addTo(map);
-
+    let map;
     const markers = {};
+    let infoWindow;
+
+    function initMap() {
+      // 힐튼 리조트와 시내 사이 육지 중심점
+      const centerCoords = { lat: 24.8030, lng: 125.2720 };
+      map = new google.maps.Map(document.getElementById('map'), {
+        zoom: 15,
+        center: centerCoords,
+        mapTypeControl: false,
+        streetViewControl: false,
+        fullscreenControl: false
+      });
+
+      infoWindow = new google.maps.InfoWindow();
+
+      places.forEach(p => {
+        const isHilton = p.id === 0;
+        // 힐튼: 빨강 핀, 도보권: 초록 핀, 시내: 파랑 핀
+        const pinColor = isHilton ? "http://maps.google.com/mapfiles/ms/icons/red-dot.png" 
+                       : (p.zone === "walk" ? "http://maps.google.com/mapfiles/ms/icons/green-dot.png" 
+                       : "http://maps.google.com/mapfiles/ms/icons/blue-dot.png");
+
+        const marker = new google.maps.Marker({
+          position: { lat: p.lat, lng: p.lng },
+          map: map,
+          title: p.name,
+          icon: pinColor
+        });
+
+        marker.addListener('click', () => {
+          const content = `
+            <div style="font-size:13px; line-height:1.4; max-width:240px; padding:4px;">
+              <b style="font-size:14px; color:#0f172a;">${p.name}</b><br>
+              <span style="color:#64748b; font-size:11px;">${p.zoneLabel} · ${p.cat}</span>
+              <p style="margin:6px 0; color:#334155;">${p.desc}</p>
+              <a href="${p.mapUrl}" target="_blank" style="color:#2563eb; font-weight:bold; text-decoration:none; font-size:12px;">구글 지도에서 열기 ↗</a>
+            </div>
+          `;
+          infoWindow.setContent(content);
+          infoWindow.open(map, marker);
+          highlightCard(p.id);
+        });
+
+        markers[p.id] = marker;
+      });
+
+      renderPlaces('all');
+    }
 
     function renderPlaces(filter = 'all') {
       const listEl = document.getElementById('placesList');
@@ -239,7 +278,6 @@
         else if (filter === 'spot' && p.type === 'spot') match = true;
 
         if (match) {
-          // 카드 생성
           const card = document.createElement('div');
           card.className = 'card';
           card.id = `card-${p.id}`;
@@ -256,43 +294,14 @@
       });
     }
 
-    // 마커 찍기
-    places.forEach(p => {
-      const isHilton = p.id === 0;
-      const markerColor = isHilton ? '#e11d48' : (p.zone === 'walk' ? '#059669' : '#2563eb');
-      
-      const customIcon = L.divIcon({
-        className: 'custom-pin',
-        html: `<div style="background-color: ${markerColor}; width: 14px; height: 14px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.4);"></div>`,
-        iconSize: [16, 16],
-        iconAnchor: [8, 8]
-      });
-
-      const marker = L.marker([p.lat, p.lng], { icon: customIcon }).addTo(map);
-      
-      const popupHtml = `
-        <div style="font-size:13px; line-height:1.4;">
-          <b style="font-size:14px; color:#0f172a;">${p.name}</b><br>
-          <span style="color:#64748b; font-size:11px;">${p.zoneLabel} · ${p.cat}</span>
-          <p style="margin:6px 0; color:#334155;">${p.desc}</p>
-          <a href="${p.mapUrl}" target="_blank" style="color:#2563eb; font-weight:bold; text-decoration:none; font-size:12px;">구글 지도에서 보기 ↗</a>
-        </div>
-      `;
-      marker.bindPopup(popupHtml);
-
-      marker.on('click', () => {
-        highlightCard(p.id);
-      });
-
-      markers[p.id] = marker;
-    });
-
     function focusPlace(id) {
       const p = places.find(x => x.id === id);
-      if (!p) return;
-      map.flyTo([p.lat, p.lng], 16, { duration: 0.8 });
-      markers[id].openPopup();
-      highlightCard(id);
+      const marker = markers[id];
+      if (!p || !marker) return;
+
+      map.panTo({ lat: p.lat, lng: p.lng });
+      map.setZoom(16);
+      google.maps.event.trigger(marker, 'click');
     }
 
     function highlightCard(id) {
@@ -304,13 +313,13 @@
       }
     }
 
-    function filterPlaces(filter) {
-      document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-      event.target.classList.add('active');
+    function filterPlaces(filter, btn) {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
       renderPlaces(filter);
     }
 
-    renderPlaces('all');
+    window.onload = initMap;
   </script>
 </body>
 </html>
