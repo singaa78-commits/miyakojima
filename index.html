@@ -136,6 +136,7 @@
       <button class="filter-btn" data-filter="shop">🛍️ 소품샵·마켓</button>
       <button class="filter-btn" data-filter="mart">🛒 마트·장보기</button>
       <button class="filter-btn" data-filter="gift">🎁 기념품 과자</button>
+      <button class="filter-btn" data-filter="yakiniku">🥩 야키니쿠</button>
       <button class="filter-btn" data-filter="spot">🏖️ 명소·편의</button>
     </div>
     <div class="content-area">
@@ -455,8 +456,18 @@
         desc: "타라마규 버거·참치 버거. 보카 버거와 비교해 보는 재미. 더그스 커피 본점과 묶어서 방문.", mapUrl: gmap("DOUG'S BURGER 宮古島本店") },
       { id: 17, name: "더그스 커피 본점", jp: "DOUG'S COFFEE 宮古島本店", cat: "커피·디저트", type: "cafe", zone: "city", zoneLabel: "시모자토 · 택시 10분", lat: 24.79600, lng: 125.28662,
         desc: "커피·치즈케이크·망고 스무디. 더그스 버거 식사 후 디저트 코스.", mapUrl: gmap("DOUG'S COFFEE 宮古島本店") },
-      { id: 18, name: "미야코규 야키니쿠 키하치 별관", jp: "喜八 別館", cat: "미야코규 숯불구이", type: "food", zone: "city", zoneLabel: "시내 · 택시 5~10분", lat: 24.80375, lng: 125.28110, approx: true,
-        desc: "고품질 미야코규 숯불 야키니쿠 (예약 필수).", mapUrl: gmap("Kihachi Bekkan Miyakojima") },
+      { id: 18, name: "미야코규 야키니쿠 키하치", jp: "喜八", cat: "미야코규 야키니쿠 · 예약 필수", type: "food", zone: "city", zoneLabel: "시내 · 택시 5~10분", lat: 24.80231, lng: 125.28087, yakiniku: true, pick: true,
+        desc: "미야코규를 한 마리 통째로 들여와 미스지·이치보 같은 희귀 부위까지 맛볼 수 있는 대표 야키니쿠. 18석 규모라 1주 전 예약 추천. 본점이 꽉 찼으면 도보 3분 거리 별관도 확인해 보세요. 食べログ 3.45 (平良字下里595)", hours: "저녁 영업 · 월요일 휴무 · 예산 ¥6,000~8,000", mapUrl: gmap("喜八 宮古島 焼肉") },
+      { id: 47, name: "미야코규 야키니쿠 키하치 별관", jp: "宮古牛焼肉 喜八 別館", cat: "미야코규 야키니쿠 · 예약 추천", type: "food", zone: "city", zoneLabel: "시내 · 택시 5~10분", lat: 24.80380, lng: 125.27826, yakiniku: true,
+        desc: "키하치 본점과 같은 미야코규 한 마리 통째 매입. 본점 예약이 어려울 때 대안으로 좋아요. 별관 2호점도 따로 있어요. (平良下里83 · ☎ 0980-79-5858)", hours: "18:00~22:00 · 수요일 휴무 (부정기 휴무 있음)", mapUrl: gmap("宮古牛焼肉 喜八 別館") },
+      { id: 41, name: "야키니쿠 나카오", jp: "焼肉なかお", cat: "미야코규 야키니쿠 · 가성비", type: "food", zone: "city", zoneLabel: "니시자토 거리 · 택시 5~10분", lat: 24.80450, lng: 125.28050, approx: true, yakiniku: true,
+        desc: "15개월 이상 키운 미야코규 야키니쿠. 미야코규 5종 모둠과 파인애플 포크가 인기. 무연 로스터 개별 룸도 있어요. 니시자토 소품샵 구경 후 바로 가기 좋아요. 食べログ 3.28 (平良字西里244)", hours: "저녁 영업 · 예산 ¥4,000~5,000", mapUrl: gmap("焼肉なかお 宮古島") },
+      { id: 44, name: "야키니쿠 카가미", jp: "焼肉 火神", cat: "미야코규 야키니쿠", type: "food", zone: "city", zoneLabel: "마쓰바라 · 택시 약 8분", lat: 24.78866, lng: 125.27969, yakiniku: true,
+        desc: "미야코규를 맛볼 수 있는 야키니쿠. 이온타운 미야코미나미 바로 옆이라 장보기와 저녁을 한 번에 묶기 좋아요. (平良字松原548-1)", hours: "영업시간·휴무일 출발 전 확인", mapUrl: gmap("焼肉 火神 宮古島") },
+      { id: 42, name: "야키니쿠 우미카제", jp: "焼肉 海風", cat: "미야코규 한 마리 통째 · 희귀 부위", type: "food", zone: "city", zoneLabel: "니시자토 거리 · 택시 5~10분", lat: 24.80385, lng: 125.28145, approx: true, yakiniku: true, pick: true,
+        desc: "15년간 최상급 미야코규만 고집한 한 마리 통째 매입 전문점. 탄모토(우설 뿌리), 신신 같은 희귀 부위가 있어요. 예약 없이 가면 만석인 경우가 많아요. 食べログ 3.43 (平良字西里300-6)", hours: "저녁 영업 · 예약 필수 · 예산 ¥6,000~8,000", mapUrl: gmap("焼肉 海風 宮古島") },
+      { id: 43, name: "숯불 야키니쿠 류구엔", jp: "炭火焼肉 琉宮苑", cat: "리조트 단독 건물 야키니쿠", type: "food", zone: "city", zoneLabel: "시기라 리조트 · 택시 약 30분", lat: 24.72076, lng: 125.33427, yakiniku: true, far: true,
+        desc: "섬 남쪽 시기라 리조트 안 단독 건물의 숯불 야키니쿠. 분위기는 좋지만 힐튼에서 멀어 왕복 택시비가 많이 들어요. 시기라 쪽 일정이 있을 때 추천. (上野字宮国974-7)", hours: "17:00~22:00 · 무휴 · 예약 추천", mapUrl: gmap("炭火焼肉 琉宮苑 宮古島") },
       { id: 19, name: "다이와 식당", jp: "大和食堂", cat: "로컬 대중식당", type: "food", zone: "city", zoneLabel: "시내 · 택시 5~10분", lat: 24.80630, lng: 125.28450, approx: true,
         desc: "소바, 참푸루, 카츠동이 맛있는 정겨운 현지 식당.", mapUrl: gmap("大和食堂 宮古島") },
       { id: 20, name: "아카가-라", jp: "あかがーら", cat: "산신 민요 라이브 주점", type: "food", zone: "city", zoneLabel: "시내 · 택시 5~10분", lat: 24.80320, lng: 125.28120, approx: true,
@@ -519,6 +530,7 @@
       walk: '힐튼에서 걸어갈 수 있는 곳. 한낮엔 일부 구간 택시도 추천.',
       city: '히라라 시내·외곽. 힐튼에서 택시 약 5~15분.',
       shop: '니시자토 거리 가게들은 모여 있어 택시에서 내려 한 번에 돌아보기 좋아요.',
+      yakiniku: '미야코규 야키니쿠. 키하치·우미카제는 인기가 많아 예약 필수. 나카오는 가성비, 카가미는 이온타운 옆, 류구엔은 시기라 리조트 쪽이라 멀어요.',
       gift: '기념품 과자를 살 수 있는 곳. 카드의 🎁 표시에서 매장별로 뭘 살 수 있는지 확인하세요. 유키시오 산도는 유키시오 뮤지엄·공항에서 확실히 살 수 있어요.',
       mart: '식료품·야식은 이온타운(맥스밸류), 면세·스노클링 용품은 돈키호테, 제철 과일은 아타라스 시장(낮 방문).'
     };
@@ -545,6 +557,7 @@
       if (filter === 'all') return true;
       if (filter === 'day2') return !!p.day2;
       if (filter === 'gift') return !!p.buy;
+      if (filter === 'yakiniku') return !!p.yakiniku;
       if (filter === 'walk' || filter === 'city') return p.zone === filter || p.id === 0;
       return p.type === filter;
     }
